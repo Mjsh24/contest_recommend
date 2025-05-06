@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공모전 추천 결과</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #64b5f6, #81c784);
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .model-select {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .model-select h2 {
+            font-size: 1.5rem;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+        .keyword-input-group {
+            margin-bottom: 1rem;
+        }
+        .keyword-label {
+            display: block;
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+        .keyword-input {
+            width: 80%;
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+        }
+        .model-buttons button {
+            background-color: #039be5;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .model-buttons button:hover {
+            background-color: #0288d1;
+        }
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        .recommendation-item {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid #27ae60; /* 추천 강조 색상 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .recommendation-item:last-child {
+            margin-bottom: 0;
+        }
+        .contest-info {
+            flex-grow: 1;
+            text-align: left;
+            margin-right: 1rem;
+        }
+        .contest-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 0.5rem;
+        }
+        .deadline-info {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .d-day {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e74c3c; /* 임박 강조 색상 */
+        }
+        .deadline {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        .no-recommendations {
+            font-size: 1.2rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ name }}님 맞춤 필터링 공모전</h1>
+
+        <div class="model-select">
+            <h2>AI 모델 예측</h2>
+            <div class="keyword-input-group">
+                <label for="keyword" class="keyword-label">관심있는 공모전의 키워드를 입력해주세요!</label>
+                <input type="text" id="keyword" class="keyword-input" placeholder="예: 디자인, 아이디어, 영상">
+            </div>
+            <div class="model-buttons">
+                <button onclick="goToPrediction('result_base')">모델1 예측</button>
+                <button onclick="goToPrediction('result_transfer')">모델2 예측</button>
+            </div>
+        </div>
+
+        <h2>맞춤 필터링 공모전 결과</h2>
+        <ul id="recommendation-list">
+            {% for contest in contests %}
+                <li class="recommendation-item">
+                    <div class="contest-info">
+                        <div class="contest-title">{{ contest.name }}</div>
+                        <div class="deadline-info">
+                            <div class="d-day">
+                                {% if contest.d_day is not none %}
+                                  D - {{ contest.d_day }}
+                                {% else %}
+                                  날짜 정보 없음
+                                {% endif %}
+                              </div>
+                    </div>
+                </li>
+            {% else %}
+                <li>추천 결과가 없습니다.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        function calculateTimeLeft(deadline) {
+            const now = new Date();
+            const deadlineDate = new Date(deadline);
+            const difference = deadlineDate.getTime() - now.getTime();
+            const daysLeft = Math.ceil(difference / (1000 * 60 * 60 * 24));
+            return daysLeft >= 0 ? daysLeft : 0;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function goToPrediction(resultPage) {
+            const keyword = document.getElementById('keyword').value.trim();
+            const nickname = "{{ name }}";  // 닉네임도 필요하다고 했지
+            const contests = {{ contests|tojson }}; // 서버에서 컨테스트 리스트 넘겼다고 가정
+    
+            if (keyword) {
+                fetch(`/model/${resultPage}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // JSON으로 보내자
+                    },
+                    body: JSON.stringify({
+                        nickname: nickname,
+                        keyword: keyword,
+                        contests: contests
+                    })
+                })
+                .then(response => response.text())
+                .then(html => {
+                    document.body.innerHTML = html; // 결과 렌더링
+                });
+            } else {
+                alert('키워드를 입력해주세요.');
+            }
+        }
+    </script>
+</body>
+</html>

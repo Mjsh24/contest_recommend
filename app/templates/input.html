@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 공모전 필터링</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #64b5f6, #81c784);
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            display: flex; /* flexbox 레이아웃 적용 */
+            flex-direction: column; /* 요소들을 세로로 배치 */
+            gap: 1.5rem; /* 요소 사이 간격 */
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        .filter-group {
+            text-align: left;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+            width: 100%; /* 부모 컨테이너의 전체 너비 사용 */
+        }
+        .filter-group p {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .filter-group label {
+            display: block;
+            margin: 0.5rem 0;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .filter-group input[type="checkbox"],
+        .filter-group input[type="radio"] {
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%; /* 부모 컨테이너의 전체 너비 사용 */
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>나만의 공모전 필터링</h1>
+        
+        <!-- 이제는 form으로 데이터 전송 -->
+        <form action="/recommend" method="POST">
+    
+            <input type="hidden" name="nickname" value="{{ nickname }}">
+            <div class="filter-group category-group">
+                <p>공모전 분야 선택 (하나만 선택 가능)</p>
+                <label><input type="checkbox" name="category" value="광고/마케팅" onclick="handleCategoryCheckbox(this)"> 광고/마케팅</label>
+                <label><input type="checkbox" name="category" value="영상/UCC/사진" onclick="handleCategoryCheckbox(this)"> 영상/UCC/사진</label>
+                <label><input type="checkbox" name="category" value="웹/모바일/IT" onclick="handleCategoryCheckbox(this)"> 웹/모바일/IT</label>
+                <label><input type="checkbox" name="category" value="예체능/미술/음악" onclick="handleCategoryCheckbox(this)"> 예체능/미술/음악</label>
+                <label><input type="checkbox" name="category" value="대외활동/서포터즈" onclick="handleCategoryCheckbox(this)"> 대외활동/서포터즈</label>
+                <label><input type="checkbox" name="category" value="논문/리포트" onclick="handleCategoryCheckbox(this)"> 논문/리포트</label>
+                <label><input type="checkbox" name="category" value="디자인/캐릭터/웹툰" onclick="handleCategoryCheckbox(this)"> 디자인/캐릭터/웹툰</label>
+                <label><input type="checkbox" name="category" value="네이밍/슬로건" onclick="handleCategoryCheckbox(this)"> 네이밍/슬로건</label>
+                <label><input type="checkbox" name="category" value="기획/아이디어" onclick="handleCategoryCheckbox(this)"> 기획/아이디어</label>
+                <label><input type="checkbox" name="category" value="게임/소프트웨어" onclick="handleCategoryCheckbox(this)"> 게임/소프트웨어</label>
+                <label><input type="checkbox" name="category" value="과학/공학" onclick="handleCategoryCheckbox(this)"> 과학/공학</label>
+                <label><input type="checkbox" name="category" value="기타" onclick="handleCategoryCheckbox(this)"> 기타</label>
+                <label><input type="checkbox" name="category" value="건축/건설/인테리어" onclick="handleCategoryCheckbox(this)"> 건축/건설/인테리어</label>
+                <label><input type="checkbox" name="category" value="문학/글/시나리오" onclick="handleCategoryCheckbox(this)"> 문학/글/시나리오</label>
+                <label><input type="checkbox" name="category" value="취업/창업" onclick="handleCategoryCheckbox(this)"> 취업/창업</label>
+            </div>
+            
+            <div class="filter-group target-group">
+                <p>참가 대상 선택</p>
+                <label><input type="checkbox" name="target" value="일반인"> 일반인</label>
+                <label><input type="checkbox" name="target" value="대학생"> 대학생</label>
+                <label><input type="checkbox" name="target" value="청소년"> 청소년</label>
+                <label><input type="checkbox" name="target" value="기타"> 기타</label>
+            </div>
+            
+            <div class="filter-group prize-group">
+                <p>공모전 상금 범위 선택</p>
+                <label><input type="radio" name="prize_range" value="150만원 이하"> 150만원 이하</label>
+                <label><input type="radio" name="prize_range" value="300만원 이하"> 300만원 이하</label>
+                <label><input type="radio" name="prize_range" value="500만원 이하"> 500만원 이하</label>
+                <label><input type="radio" name="prize_range" value="500만원 초과"> 500만원 초과</label>
+                <label><input type="radio" name="prize_range" value="기타"> 기타</label>  <!-- 추가 -->
+            </div>
+
+            <button type="submit">추천받기</button>
+        </form>
+    </div>
+</body>
+</html>

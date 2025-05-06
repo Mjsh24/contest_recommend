@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 남기기</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #81c784, #64b5f6);
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .review-input {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        .review-input label {
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+            text-align: left;
+        }
+        .review-input textarea {
+            padding: 0.8rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            height: 100px;
+            margin-bottom: 1rem;
+        }
+        .review-input button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .review-input button:hover {
+            background-color: #219653;
+        }
+        .review-list-container {
+            width: 100%;
+            text-align: left;
+            margin-top: 2rem;
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+        }
+        .review-list-container h2 {
+            font-size: 1.5rem;
+            color: #34495e;
+            margin-bottom: 1rem;
+        }
+        .review-item {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-left: 3px solid #f39c12; /* 리뷰 강조 색상 */
+        }
+        .review-item p {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 0.3rem;
+            white-space: pre-line; /* 줄바꿈 유지 */
+        }
+        .review-item .reviewer-info {
+            font-size: 0.9rem;
+            color: #777;
+            text-align: right;
+        }
+        .no-reviews {
+            font-size: 1rem;
+            color: #777;
+        }
+        .back-button {
+            background-color: #777;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #555;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 닉네임 파라미터로 받는 부분은 OK
+            const urlParams = new URLSearchParams(window.location.search);
+            const nickname = urlParams.get('nickname');
+            if (nickname) {
+                document.getElementById('reviewer-nickname').value = nickname;
+            }
+            loadReviewsFromServer();
+        });
+
+        function submitReview() {
+            const nicknameInput = document.getElementById('reviewer-nickname');
+            const reviewTextarea = document.getElementById('review-text');
+            const nickname = nicknameInput.value.trim();
+            const review = reviewTextarea.value.trim();
+
+            if (nickname && review) {
+                const formData = new FormData();
+                formData.append('nickname', nickname);
+                formData.append('review_content', review);
+
+                fetch('/submit_review', {  <!-- 여기가 핵심! 수정 -->
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.message.includes('성공')) {
+                        reviewTextarea.value = '';
+                        loadReviewsFromServer(); // 저장 성공하면 목록 다시 불러오기
+                    }
+                })
+                .catch(error => {
+                    console.error('리뷰 저장 실패:', error);
+                    alert('리뷰 저장에 실패했습니다.');
+                });
+            } else {
+                alert('닉네임과 리뷰 내용을 모두 입력해주세요.');
+            }
+        }
+
+        function loadReviewsFromServer() {
+            const reviewListContainer = document.getElementById('review-list');
+            reviewListContainer.innerHTML = ''; // 기존 목록 비우기
+        
+            fetch('/load_reviews')
+                .then(response => response.json())
+                .then(reviews => {
+                    if (reviews.length > 0) {
+                        const reviewsTitle = document.createElement('h2');
+                        reviewsTitle.textContent = '최근 리뷰';
+                        reviewListContainer.appendChild(reviewsTitle);
+        
+                        reviews.forEach(review => {
+                            const reviewItem = document.createElement('div');
+                            reviewItem.classList.add('review-item');
+                            reviewItem.innerHTML = `
+                                <p><strong>${review.nickname}:</strong></p>
+                                <p>${review.review_content}</p>
+                                <p class="reviewer-info">${formatTimestamp(review.created_at)}</p>
+                            `;
+                            reviewListContainer.appendChild(reviewItem);
+                        });
+                    } else {
+                        const noReviews = document.createElement('p');
+                        noReviews.classList.add('no-reviews');
+                        noReviews.textContent = '아직 등록된 리뷰가 없습니다.';
+                        reviewListContainer.appendChild(noReviews);
+                    }
+                })
+                .catch(error => {
+                    console.error('리뷰 목록 로드 실패:', error);
+                    alert('리뷰 목록을 불러오는 데 실패했습니다.');
+                });
+        }
+        
+
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        function goToMainPage() {
+            window.location.href = '/';   <!-- 메인으로 돌아가기 경로도 수정 -->
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>리뷰 남기기</h1>
+        <div class="review-input">
+            <label for="reviewer-nickname">닉네임:</label>
+            <input type="text" id="reviewer-nickname" name="nickname" value="{{ nickname }}" readonly>
+            <label for="review-text">리뷰 내용:</label>
+            <textarea id="review-text" placeholder="추천 결과에 대한 리뷰를 남겨주세요"></textarea>
+            <button onclick="submitReview()">리뷰 등록</button>
+        </div>
+        <div class="review-list-container" id="review-list">
+            <!-- 리뷰 목록이 여기에 표시됨 -->
+        </div>
+        <button class="back-button" onclick="goToMainPage()">메인 페이지로 돌아가기</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공모전 추천 결과</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #64b5f6, #81c784);
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        .recommendation-item {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid #27ae60; /* 추천 강조 색상 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .recommendation-item:last-child {
+            margin-bottom: 0;
+        }
+        .contest-info {
+            flex-grow: 1;
+            text-align: left;
+            margin-right: 1rem;
+        }
+        .contest-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 0.5rem;
+        }
+        .deadline-info {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .d-day {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e74c3c; /* 임박 강조 색상 */
+        }
+        .deadline {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        .no-recommendations {
+            font-size: 1.2rem;
+            color: #777;
+        }
+        .review-request {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .review-buttons button {
+            background-color: #039be5;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        .review-buttons button:hover {
+            background-color: #0288d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ name }}님을 위한 추천 공모전</h1>
+        <ul id="recommendation-list">
+            {% if recommended_contests %}
+                {% for contest in recommended_contests %}
+                    <li class="recommendation-item">
+                        <div class="contest-info">
+                            <div class="contest-title">{{ contest['name'] }}</div>
+                            <div class="deadline-info">
+                                <div class="d-day">
+                                    {% if contest['d_day'] %}
+                                        D - {{ contest['d_day'] }}
+                                    {% else %}
+                                        날짜 정보 없음
+                                    {% endif %}
+                                </div>
+                                <div class="deadline">{{ contest['register_end'] }}</div>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="no-recommendations">추천 결과가 없습니다.</li>
+            {% endif %}
+        </ul>
+        <div class="review-request">
+            추천 결과가 마음에 드셨나요?
+        </div>
+        <div class="review-buttons">
+            <button onclick="location.href='/review?nickname={{ name }}'">예</button>
+            <button onclick="location.href='/'">아니오</button>
+        </div>
+    </div>
+
+    <script>
+        function calculateTimeLeft(deadline) {
+            const now = new Date();
+            const deadlineDate = new Date(deadline);
+            const difference = deadlineDate.getTime() - now.getTime();
+            const daysLeft = Math.ceil(difference / (1000 * 60 * 60 * 24));
+            return daysLeft >= 0 ? daysLeft : 0;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    </script>
+</body>
+</html>

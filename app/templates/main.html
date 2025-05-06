@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공모전 추천 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #64b5f6, #81c784); /* 요청하신 배경색 */
+            color: #333; /* 텍스트 색상을 좀 더 어둡게 */
+        }
+        .container {
+            text-align: center;
+            background-color: white; /* 중간 박스를 흰색으로 변경 */
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 {
+            font-size: 2.7rem;
+            margin-bottom: 1.2rem;
+            color: #2c3e50; /* 제목 색상 변경 */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #555; /* 텍스트 색상 변경 */
+        }
+        .input-field {
+            margin-bottom: 1.5rem;
+        }
+        .input-field input {
+            padding: 0.7rem;
+            font-size: 1.1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            color: #333;
+        }
+        .input-field input::placeholder {
+            color: #777;
+        }
+        button {
+            background-color: #27ae60; /* 버튼 색상 변경 */
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #219653; /* 호버 시 색상 변경 */
+        }
+    </style>
+
+    <script>
+        function startApp() {
+            const inputField = document.getElementById('nickname');
+            let nickname = inputField.value.trim();
+            if (!nickname) {
+                nickname = "기본 닉네임";
+            }
+            // alert(`닉네임: ${nickname}으로 시작합니다!`);
+            window.location.href = `/input?nickname=${encodeURIComponent(nickname)}`;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>공모전 추천 시스템</h1>
+        <p>원하는 공모전을 쉽고 빠르게 찾아보세요!</p>
+        <div class="input-field">
+            <input type="text" id="nickname" placeholder="닉네임을 입력하세요">
+        </div>
+        <button type="button" onclick="startApp()">시작하기</button>
+    </div>
+</body>
+</html>
